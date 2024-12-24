@@ -8,11 +8,11 @@ const userValidationSchema = z.object({
       .email('Invalid email address')
       .nonempty('Email is required'),
     password: z
-      .string()
+      .string({
+        invalid_type_error: 'Password must be string',
+      })
       .min(8, 'Password must be at least 8 characters long')
       .nonempty('Password is required'),
-    role: z.enum(['admin', 'user']).default('user'),
-    isBlocked: z.boolean().default(false),
   }),
 });
 
