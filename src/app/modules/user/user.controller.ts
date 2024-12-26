@@ -13,6 +13,17 @@ const createUser = catchAsync(async (req, res) => {
   });
 });
 
+const blockUser = catchAsync(async (req, res) => {
+  const result = await UserServices.blockUserInDB(req.params.userId);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'User blocked successfully',
+    data: result,
+  });
+});
+
 export const UserController = {
   createUser,
+  blockUser,
 };

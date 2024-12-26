@@ -8,5 +8,8 @@ export default {
   port: process.env.PORT,
   mongoDb_uri: process.env.MONGODB_URI,
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
-  default_password: process.env.DEFAULT_PASS,
+  jwt: {
+    secret: process.env.JWT_SECRET || 'your-secret-key',
+    expires_in: '7d',
+  },
 };
