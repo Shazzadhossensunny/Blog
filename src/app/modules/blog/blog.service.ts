@@ -28,6 +28,15 @@ const deleteBlogFromDB = async (id: string, userId: string) => {
   return result;
 };
 
+const adminDeleteBlogFromDB = async (id: string) => {
+  const blog = await Blog.findByIdAndDelete(id);
+
+  if (!blog) {
+    throw new ApiError(404, 'Blog not found');
+  }
+  return blog;
+};
+
 const getAllBlogsFromDB = async (queryParams: {
   search?: string;
   sortBy?: string;
@@ -61,5 +70,6 @@ export const BlogServices = {
   createBlogIntoDB,
   updateBlogInDB,
   deleteBlogFromDB,
+  adminDeleteBlogFromDB,
   getAllBlogsFromDB,
 };

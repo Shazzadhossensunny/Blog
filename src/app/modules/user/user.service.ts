@@ -1,11 +1,11 @@
-import ApiError from '../../errors/AppError';
+import AppError from '../../errors/AppError';
 import { TUser } from './user.interface';
 import { User } from './user.model';
 
 const createUserIntoDB = async (payload: TUser) => {
   const existingUser = await User.findOne({ email: payload.email });
   if (existingUser) {
-    throw new ApiError(400, 'Email already  exists');
+    throw new AppError(400, 'Email already  exists');
   }
   return await User.create(payload);
 };
@@ -19,7 +19,7 @@ const findUserByEmail = async (email: string) => {
 const blockUserInDB = async (userId: string) => {
   const user = await User.findById(userId);
   if (!user) {
-    throw new ApiError(404, 'User not found');
+    throw new AppError(404, 'User not found');
   }
 
   user.isBlocked = true;

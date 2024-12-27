@@ -1,17 +1,11 @@
 import express from 'express';
-import { validateRequest } from '../../middlewares/validateRequest';
-import { userValidationSchema } from './user.validation';
 import { UserController } from './user.controller';
 import auth from '../../middlewares/auth';
+import { BlogController } from '../blog/blog.controller';
 
 const router = express.Router();
 
-router.post(
-  '/register',
-  validateRequest(userValidationSchema.createUserValidationSchema),
-  UserController.createUser,
-);
-
-router.patch('/:userId/block', auth('admin'), UserController.blockUser);
+router.patch('/users/:userId/block', auth('admin'), UserController.blockUser);
+router.delete('/blogs/:id', auth('admin'), BlogController.adminDeleteBlog);
 
 export default router;

@@ -6,7 +6,7 @@ import blogRoutes from '../modules/blog/blog.route';
 const router = express.Router();
 
 router.use('/auth', authRoutes);
-router.use('/users', userRoutes);
+router.use('/admin', userRoutes);
 router.use('/blogs', blogRoutes);
 
 export default router;

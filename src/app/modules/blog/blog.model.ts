@@ -10,6 +10,7 @@ const blogSchema = new mongoose.Schema<TBlog>(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
   },
 );
 
