@@ -1,4 +1,4 @@
-import ApiError from '../../errors/AppError';
+import AppError from '../../errors/AppError';
 import { TBlog } from './blog.interface';
 import { Blog } from './blog.model';
 
@@ -9,11 +9,15 @@ const createBlogIntoDB = async (payload: TBlog) => {
 const updateBlogInDB = async (
   id: string,
   userId: string,
+  userRole: string,
   blogData: Partial<TBlog>,
 ) => {
+  if (userRole === 'admin') {
+    throw new AppError(403, 'Admins are not allowed to update blogs');
+  }
   const blog = await Blog.findOne({ _id: id, author: userId });
   if (!blog) {
-    throw new ApiError(404, 'Blog not found');
+    throw new AppError(404, 'Blog not found');
   }
 
   Object.assign(blog, blogData);
@@ -23,7 +27,7 @@ const updateBlogInDB = async (
 const deleteBlogFromDB = async (id: string, userId: string) => {
   const result = await Blog.findOneAndDelete({ _id: id, author: userId });
   if (!result) {
-    throw new ApiError(404, 'Blog not found');
+    throw new AppError(404, 'Blog not found');
   }
   return result;
 };
@@ -32,7 +36,7 @@ const adminDeleteBlogFromDB = async (id: string) => {
   const blog = await Blog.findByIdAndDelete(id);
 
   if (!blog) {
-    throw new ApiError(404, 'Blog not found');
+    throw new AppError(404, 'Blog not found');
   }
   return blog;
 };

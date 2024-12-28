@@ -32,6 +32,7 @@ const updateBlog = catchAsync(async (req: Request, res: Response) => {
   const result = await BlogServices.updateBlogInDB(
     req.params.id,
     req.user?._id,
+    req.user?.role,
     req.body,
   );
   sendResponse(res, {
