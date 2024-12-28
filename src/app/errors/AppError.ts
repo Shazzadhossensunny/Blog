@@ -1,29 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// class AppError extends Error {
-//   public statusCode: number;
-//   constructor(statusCode: number, message: string, stack = '') {
-//     super(message);
-//     this.statusCode = statusCode;
-
-//     if (stack) {
-//       this.stack = stack;
-//     } else {
-//       Error.captureStackTrace(this, this.constructor);
-//     }
-//   }
-// }
-
-// export default AppError;
-
-class ApiError extends Error {
+class AppError extends Error {
   statusCode: number;
-  error?: any;
 
-  constructor(statusCode: number, message: string, error?: any) {
+  constructor(statusCode: number, message: string, stack = '') {
     super(message);
     this.statusCode = statusCode;
-    this.error = error;
+    if (stack) {
+      this.stack = stack;
+    } else {
+      Error.captureStackTrace(this, this.constructor);
+    }
   }
 }
 
-export default ApiError;
+export default AppError;

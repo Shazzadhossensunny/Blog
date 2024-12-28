@@ -1,39 +1,80 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ErrorRequestHandler } from 'express';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-unused-vars */
+import { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
+import { TErrorSources } from '../interface/error';
 import { ZodError } from 'zod';
-import config from '../config';
+import handleZodError from '../errors/handleZodError';
+import handleValidationError from '../errors/handleValidationError';
+import handleCastError from '../errors/handleCastError';
+import handleDuplicateError from '../errors/handleDuplicateError';
 import AppError from '../errors/AppError';
+import config from '../config';
 
-export const globalErrorRequestHandler: ErrorRequestHandler = (
-  error,
-  req,
-  res,
-) => {
+const globalErrorRequestHandler: ErrorRequestHandler = (
+  err: any,
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
+  // Setting default values
   let statusCode = 500;
-  let message = 'Internal Server Error';
-  let errorDetails: { path: string; message: any }[] = [];
+  let message = 'Something went wrong!';
+  let errorSources: TErrorSources = [
+    {
+      path: '',
+      message: 'Something went wrong',
+    },
+  ];
 
-  if (error instanceof ZodError) {
-    statusCode = 400;
-    message = 'Validation Error';
-    errorDetails = error.errors.map((err) => ({
-      path: err.path.join('.'),
-      message: err.message,
-    }));
-  } else if (error instanceof AppError) {
-    statusCode = error.statusCode;
-    message = error.message;
-    errorDetails = error.error ? [{ path: '', message: error.error }] : [];
-  } else if (error instanceof Error) {
-    message = error.message;
-    errorDetails = [{ path: '', message: error.message }];
+  // Error handling based on error types
+  if (err instanceof ZodError) {
+    const simplifiedError = handleZodError(err);
+    statusCode = simplifiedError?.statusCode;
+    message = simplifiedError?.message;
+    errorSources = simplifiedError?.errorSources;
+  } else if (err?.name === 'ValidationError') {
+    const simplifiedError = handleValidationError(err);
+    statusCode = simplifiedError?.statusCode;
+    message = simplifiedError?.message;
+    errorSources = simplifiedError?.errorSources;
+  } else if (err?.name === 'CastError') {
+    const simplifiedError = handleCastError(err);
+    statusCode = simplifiedError?.statusCode;
+    message = simplifiedError?.message;
+    errorSources = simplifiedError?.errorSources;
+  } else if (err?.code === 11000) {
+    const simplifiedError = handleDuplicateError(err);
+    statusCode = simplifiedError?.statusCode;
+    message = simplifiedError?.message;
+    errorSources = simplifiedError?.errorSources;
+  } else if (err instanceof AppError) {
+    statusCode = err?.statusCode;
+    message = err.message;
+    errorSources = [
+      {
+        path: '',
+        message: err?.message,
+      },
+    ];
+  } else if (err instanceof Error) {
+    message = err.message;
+    errorSources = [
+      {
+        path: '',
+        message: err?.message,
+      },
+    ];
   }
 
+  // Send the error response
   res.status(statusCode).json({
     success: false,
     message,
     statusCode,
-    error: errorDetails || { details: 'No additional details available' },
-    stack: config.NODE_ENV === 'development' ? error.stack : undefined,
+    error: errorSources,
+    stack: config.NODE_ENV === 'development' ? err?.stack : null,
   });
 };
+
+export default globalErrorRequestHandler;
