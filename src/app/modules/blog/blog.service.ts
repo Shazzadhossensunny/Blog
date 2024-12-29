@@ -1,9 +1,19 @@
+import mongoose from 'mongoose';
 import AppError from '../../errors/AppError';
-import { TBlog } from './blog.interface';
+import { TBlog, TQueryParams } from './blog.interface';
 import { Blog } from './blog.model';
 
 const createBlogIntoDB = async (payload: TBlog) => {
-  return await Blog.create(payload);
+  const newBlog = await Blog.create(payload);
+  const populatedBlog = await Blog.findById(newBlog._id)
+    .populate('author', 'name email')
+    .lean();
+  return {
+    _id: populatedBlog?._id,
+    title: populatedBlog?.title,
+    content: populatedBlog?.content,
+    author: populatedBlog?.author,
+  };
 };
 
 const updateBlogInDB = async (
@@ -21,7 +31,13 @@ const updateBlogInDB = async (
   }
 
   Object.assign(blog, blogData);
-  return await blog.save();
+  await blog.save();
+  const updatedBlog = await Blog.findById(blog._id)
+    .select('_id title content author')
+    .populate('author', 'name email')
+    .lean();
+
+  return updatedBlog;
 };
 
 const deleteBlogFromDB = async (id: string, userId: string) => {
@@ -41,17 +57,12 @@ const adminDeleteBlogFromDB = async (id: string) => {
   return blog;
 };
 
-const getAllBlogsFromDB = async (queryParams: {
-  search?: string;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-  filter?: string;
-}) => {
+const getAllBlogsFromDB = async (queryParams: TQueryParams) => {
   const { search, sortBy, sortOrder, filter } = queryParams;
   let query = Blog.find();
 
   if (search) {
-    query = query.find({
+    query = query?.find({
       $or: [
         { title: { $regex: search, $options: 'i' } },
         { content: { $regex: search, $options: 'i' } },
@@ -60,14 +71,39 @@ const getAllBlogsFromDB = async (queryParams: {
   }
 
   if (filter) {
+    // Validate if filter is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(filter)) {
+      throw new Error('Invalid author ID format');
+    }
     query = query.find({ author: filter });
   }
 
-  if (sortBy && sortOrder) {
-    query = query.sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 });
+  if (sortBy) {
+    // Validate sortBy field exists in schema
+    const validSortFields = ['title', 'createdAt', 'updatedAt'];
+    if (!validSortFields.includes(sortBy)) {
+      throw new Error(
+        `Invalid sort field. Must be one of: ${validSortFields.join(', ')}`,
+      );
+    }
+
+    const sortDirection = sortOrder === 'asc' ? 1 : -1;
+    query = query.sort({ [sortBy]: sortDirection });
+  } else if (sortOrder) {
+    // If sortOrder is provided without sortBy, default to sorting by createdAt
+    query = query.sort({ createdAt: sortOrder === 'asc' ? 1 : -1 });
   }
 
-  return await query.populate('author', 'name email');
+  const blogs = await query
+    .select('_id title content')
+    .populate('author', '_id name email')
+    .lean();
+
+  if (!blogs || blogs.length === 0) {
+    throw new AppError(404, 'No blogs found');
+  }
+
+  return blogs;
 };
 
 export const BlogServices = {

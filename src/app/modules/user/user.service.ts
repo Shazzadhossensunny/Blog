@@ -7,7 +7,14 @@ const createUserIntoDB = async (payload: TUser) => {
   if (existingUser) {
     throw new AppError(400, 'Email already  exists');
   }
-  return await User.create(payload);
+  const newUser = await User.create(payload);
+
+  // Return only the required fields
+  return {
+    _id: newUser?._id,
+    name: newUser?.name,
+    email: newUser?.email,
+  };
 };
 
 // Helper function: Find a user by email
