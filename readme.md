@@ -44,8 +44,8 @@ The Blog Management Application is a RESTful API service that allows users to ma
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-repo/blog-management-system.git
-   cd blog-management-system
+   git clone https://github.com/Shazzadhossensunny/Blog.git
+   cd Blog
    ```
 
 2. Install dependencies:
@@ -62,7 +62,6 @@ The Blog Management Application is a RESTful API service that allows users to ma
    PORT=5000
    DATABASE_URL=mongodb://localhost:27017/blog
    JWT_SECRET=your_jwt_secret
-   JWT_EXPIRES_IN=1d
    NODE_ENV=development
    ```
 
