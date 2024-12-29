@@ -2,7 +2,7 @@
 
 ## Live URL
 
-This application is hosted at: [https://blog-backend-mu-cyan.vercel.app/](#)
+This application is hosted at: [https://blog-backend-mu-cyan.vercel.app/]
 
 ## Description
 
