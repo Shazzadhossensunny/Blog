@@ -15,11 +15,11 @@ const loginUserIntoSystem = async (payload: TLoginUser) => {
 
   const jwtPayload = { _id: user?._id, role: user?.role };
 
-  const accessToken = jwt.sign(jwtPayload, config.jwt_access_secret as string, {
+  const token = jwt.sign(jwtPayload, config.jwt_access_secret as string, {
     expiresIn: '70d',
   });
 
-  return { accessToken };
+  return { token };
 };
 
 export const AuthServices = {
