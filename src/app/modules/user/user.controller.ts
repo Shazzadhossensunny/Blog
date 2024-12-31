@@ -1,3 +1,4 @@
+import AppError from '../../errors/AppError';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { UserServices } from './user.service';
@@ -13,6 +14,9 @@ const createUser = catchAsync(async (req, res) => {
 });
 
 const blockUser = catchAsync(async (req, res) => {
+  if (req.params.userId === req.user?._id.toString()) {
+    throw new AppError(400, 'You cannot block yourself!');
+  }
   const result = await UserServices.blockUserInDB(req.params.userId);
   sendResponse(res, {
     statusCode: 200,

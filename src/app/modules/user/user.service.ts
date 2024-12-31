@@ -28,6 +28,9 @@ const blockUserInDB = async (userId: string) => {
   if (!user) {
     throw new AppError(404, 'User not found');
   }
+  if (user.role === 'admin') {
+    throw new AppError(403, 'Admins cannot be blocked!');
+  }
 
   user.isBlocked = true;
   return await user.save();
