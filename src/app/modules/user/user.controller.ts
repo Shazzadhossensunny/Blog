@@ -17,12 +17,11 @@ const blockUser = catchAsync(async (req, res) => {
   if (req.params.userId === req.user?._id.toString()) {
     throw new AppError(400, 'You cannot block yourself!');
   }
-  const result = await UserServices.blockUserInDB(req.params.userId);
+  await UserServices.blockUserInDB(req.params.userId);
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: 'User blocked successfully',
-    data: result,
   });
 });
 
